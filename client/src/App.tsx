@@ -4,44 +4,45 @@ import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 // React Router
 import { Navigate, Route, Routes } from "react-router-dom";
 
-// // Styles & Layouts
-// import appTheme from "./assets/styles/appTheme";
-// import LandingLayout from "./layouts/LandingLayout";
-// import RegistrationLayout from "./layouts/RegistrationLayout";
+// Styles & Layouts
+import appTheme from "./assets/styles/appTheme";
+import LandingLayout from "./layouts/LandingLayout";
+import RegistrationLayout from "./layouts/RegistrationLayout";
 
-// // Miscellaneous Pages
-// import Logout from "./pages/Logout";
-// import MissingPage from "./pages/MissingPage";
-// import HomeRedirect from "./pages/HomeRedirect";
-// import RegistrationVerify from "./features/registration/RegistrationVerify";
-// import PublicProtectedRoute from "./features/authentication/PublicProtectedRoute";
-// import ForgotPassword from "./features/authentication/ForgotPassword";
+// Miscellaneous Pages
+import Logout from "./pages/Logout";
+import MissingPage from "./pages/MissingPage";
+import HomeRedirect from "./pages/HomeRedirect";
+import RegistrationVerify from "./pages/landing/registration/RegistrationVerify";
+import ForgotPassword from "./pages/landing/ForgotPasswordPage.tsx";
+import ResetPassword from "./pages/landing/ResetPasswordPage.tsx";
 
-// // Landing Pages
-// import Landing from "./pages/landing/LandingPage";
-// import LoginPage from "./pages/LoginPage";
+// Landing Pages
+import Landing from "./pages/landing/LandingPage";
+import LoginPage from "./pages/landing/LoginPage";
 
-// // Registration Forms
-// import RegistrationGeneral from "./features/registration/RegistrationGeneral";
-// import RegistrationContact from "./features/registration/RegistrationContact";
-// import RegistrationFamily from "./features/registration/RegistrationFamily";
-// import RegistrationPicture from "./features/registration/RegistrationPicture";
-// import RegistrationLegal from "./features/registration/RegistrationLegal";
-// import RegistrationSummary from "./features/registration/RegistrationSummary";
+// Registration Forms
+import RegistrationGeneral from "./pages/landing/registration/RegistrationGeneral";
+import RegistrationContact from "./pages/landing/registration/RegistrationContact";
+import RegistrationFamily from "./pages/landing/registration/RegistrationFamily";
+import RegistrationPicture from "./pages/landing/registration/RegistrationPicture";
+import RegistrationLegal from "./pages/landing/registration/RegistrationLegal";
+import RegistrationSummary from "./pages/landing/registration/RegistrationSummary";
 
-// // Public Pages
-// import PublicDashboard from "./pages/public/PublicDashboard";
-// import PublicPrograms from "./pages/public/PublicPrograms";
-// import PublicAdultClinics from "./pages/public/PublicAdultClinics";
-// import PublicAdultSession from "./pages/public/PublicAdultSession";
-// import PublicPayments from "./pages/public/PublicPayments";
-// import PublicCheckout from "./pages/public/PublicCheckout";
-// import PublicReceipt from "./pages/public/PublicReceipt";
-// import PublicJuniorClinics from "./pages/public/PublicJuniorClinics";
-// import PublicClubCredit from "./pages/public/PublicClubCredit";
-// import PublicClubCreditPurchase from "./pages/public/PublicClubCreditPurchase";
-// import PublicBookings from "./pages/public/PublicBookings";
-// import PublicBookingGrid from "./pages/public/PublicBookCourt";
+// Public Pages
+import PublicProtectedRoute from "./features/auth/protected_routes/PublicProtected";
+import PublicDashboard from "./pages/public/PublicDashboard";
+import PublicPrograms from "./pages/public/PublicPrograms";
+import PublicAdultClinics from "./pages/public/PublicAdultClinics";
+import PublicAdultSession from "./pages/public/PublicAdultSession";
+import PublicPayments from "./pages/public/PublicPayments";
+import PublicCheckout from "./pages/public/PublicCheckout";
+import PublicReceipt from "./pages/public/PublicReceipt";
+import PublicJuniorClinics from "./pages/public/PublicJuniorClinics";
+import PublicClubCredit from "./pages/public/PublicClubCredit";
+import PublicClubCreditPurchase from "./pages/public/PublicClubCreditPurchase";
+import PublicBookings from "./pages/public/PublicBookings";
+import PublicBookingGrid from "./pages/public/PublicBookCourt";
 
 const theme = createTheme(appTheme);
 
@@ -68,6 +69,7 @@ function AppRoutes() {
             <Route path="verify" element={<RegistrationVerify />} />
           </Route>
           <Route path="forgot" element={<ForgotPassword />} />
+          <Route path="reset" element={<ResetPassword />} />
         </Route>
 
         {/* Public Pages */}

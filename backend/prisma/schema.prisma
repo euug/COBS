@@ -1,0 +1,279 @@
+// Defaults
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Programs
+model Program {
+  id            String      @id @default(cuid())
+  name          String      @db.VarChar(255)
+  description   String?     @db.VarChar(2047)
+  minAge        Int         @db.SmallInt
+  maxAge        Int         @db.SmallInt
+  session       Session[]
+  programType   ProgramType @relation(fields: [programTypeId], references: [id])
+  programTypeId String
+  createdAt     DateTime    @db.Timestamptz() @default(now())
+  updatedAt     DateTime    @db.Timestamptz() @updatedAt
+}
+
+model Session {
+  id                  String      @id @default(cuid())
+  name                String      @db.VarChar(255)
+  coach               ClubUser    @relation("SessionCoach", fields: [coachId], references: [id])
+  program             Program     @relation(fields: [programId], references: [id])
+  programId           String
+  coachId             String
+  isActive            Boolean
+  Status              String      @db.VarChar(63)
+  isGst               Boolean
+  isPst               Boolean
+  regularPrice        Float
+  memberPrice         Float
+  maxSpots            Int         @db.SmallInt
+  totalWeeks          Int         @db.SmallInt
+  dayOfWeek           String[]    @db.VarChar(63)
+  startDatetime       DateTime    @db.Timestamptz()
+  endDatetime         DateTime    @db.Timestamptz()
+  sessionDates        DateTime[]  @db.Timestamptz()
+  registrationStart   DateTime    @db.Timestamptz()
+  registrationEnd     DateTime    @db.Timestamptz()
+  transactions        Transaction[]
+  waitlist            ClubUser[]  @relation("WaitlistedUserSessions")
+  createdAt           DateTime    @db.Timestamptz() @default(now())
+  updatedAt           DateTime    @db.Timestamptz() @updatedAt
+}
+
+model ProgramType {
+  id            String      @id @default(cuid())
+  name          String      @db.VarChar(255)
+  image         String?     @db.VarChar(255) @default("program_type.jpg")
+  description   String?     @db.VarChar(2047)
+  ageRange      String      @db.VarChar(31)
+  link          String      @db.VarChar(255)
+  programs      Program[]
+  publicAllowed Boolean
+  createdAt     DateTime    @db.Timestamptz() @default(now())
+  updatedAt     DateTime    @db.Timestamptz() @updatedAt
+}
+
+model ProgramSettings {
+  id                String        @id @default(cuid())
+  name              String        @db.VarChar(63) @unique
+  value             String
+  description       String
+  createdAt         DateTime      @db.Timestamptz() @default(now())
+  updatedAt         DateTime      @db.Timestamptz() @updatedAt          
+}
+
+// Club Users
+model ClubUser {
+  id                      String          @id @default(cuid())
+  username                String          @unique
+  email                   String          @unique
+  firstName               String          @db.VarChar(255)
+  lastName                String          @db.VarChar(255)
+  dateOfBirth             DateTime        @db.Date
+  gender                  String          @db.VarChar(15) @default("other")
+  address                 Address?
+  phonePrimary            String          @db.VarChar(15)
+  phoneOther              String          @db.VarChar(15)
+  emergencyName           String          @db.VarChar(255)
+  emergencyPhone          String          @db.VarChar(15)
+  pictureUse              Boolean
+  legalAgreement          String          @db.VarChar(255)
+  isLeague                Boolean
+  isActive                Boolean
+  expiryDate              DateTime?       @db.Timestamptz()
+  clubCredit              Float
+  family                  ClubUser[]      @relation("ClubUserFamily")
+  primaryUser             ClubUser?       @relation("ClubUserFamily", fields: [primaryUserId], references: [id] )
+  primaryUserId           String?
+  allergiesMedications    String?
+  conditionsDisabilities  String?
+  clubUserType            ClubUserType    @relation(fields: [clubUserTypeId], references: [id])
+  clubUserTypeId          String
+  favouritePlayers        ClubUser[]      @relation("ClubUserFav")
+  favouritedBy            ClubUser?       @relation("ClubUserFav", fields: [favouritedById], references: [id])
+  favouritedById          String?
+  sessionsCoached         Session[]       @relation("SessionCoach")
+  waitlistedSessions      Session[]       @relation("WaitlistedUserSessions")
+  bookings                Booking[]
+  transactions            Transaction[]
+  createdAt               DateTime        @db.Timestamptz() @default(now())
+  updatedAt               DateTime        @db.Timestamptz() @updatedAt
+}
+
+model ClubUserType {
+  id  String      @id @default(cuid())
+  type            String      @db.VarChar(63)
+  subtype         String      @db.VarChar(63)
+  clubUsers       ClubUser[]
+  bookingRules    CourtBookingRules[]
+  createdAt       DateTime    @db.Timestamptz() @default(now())
+  updatedAt       DateTime    @db.Timestamptz() @updatedAt
+
+  @@unique([type, subtype])
+}
+
+model Address {
+  id            String      @id @default(cuid())
+  preAddr       String      @db.VarChar(255)
+  streetAddr    String      @db.VarChar(255)
+  city          String      @db.VarChar(255)
+  province      String      @db.VarChar(255)
+  postalCode    String      @db.VarChar(15)
+  user          ClubUser    @relation(fields: [userId], references: [id])
+  userId        String      @unique
+  createdAt     DateTime    @db.Timestamptz() @default(now())
+  updatedAt     DateTime    @db.Timestamptz() @updatedAt
+}
+
+// Court Bookings
+model Court {
+  id            String              @id @default(cuid())
+  name          String              @db.VarChar(63)
+  isIndoor      Boolean
+  bookings      Booking[]
+  bookingRules  CourtBookingRules[]
+  createdAt     DateTime            @db.Timestamptz() @default(now())
+  updatedAt     DateTime            @db.Timestamptz() @updatedAt
+}
+
+model BookingType {
+  id            String      @id @default(cuid())
+  type          String      @db.VarChar(63)
+  subtype       String      @db.VarChar(63)
+  color         String      @db.VarChar(15)
+  bookings      Booking[]
+  createdAt     DateTime    @db.Timestamptz() @default(now())
+  updatedAt     DateTime    @db.Timestamptz() @updatedAt
+
+  @@unique([type, subtype])
+}
+
+model Booking {
+  id            String      @id @default(cuid())
+  datetime      DateTime    @db.Timestamptz()
+  duration      Int         @db.SmallInt
+  checkRules    Boolean
+  bookingType   BookingType @relation(fields: [bookingTypeId], references: [id])
+  bookingTypeId String
+  court         Court       @relation(fields: [courtId], references: [id])
+  courtId       String
+  players     ClubUser[]
+  createdAt     DateTime    @db.Timestamptz() @default(now())
+  updatedAt     DateTime    @db.Timestamptz() @updatedAt
+}
+
+model BookingSettings {
+  id                String        @id @default(cuid())
+  name              String        @unique
+  value             String
+  description       String
+  createdAt         DateTime      @db.Timestamptz() @default(now())
+  updatedAt         DateTime      @db.Timestamptz() @updatedAt
+}
+
+model CourtBookingRules {
+  id                    String            @id @default(cuid())
+  court                 Court             @relation(fields: [courtId], references: [id])
+  courtId               String
+  clubUserType          ClubUserType      @relation(fields:[clubUserTypeId], references: [id])
+  clubUserTypeId        String
+  regularDaysAhead      Int               @db.SmallInt
+  freeHoursAhead        Int               @db.SmallInt
+  ballMachineHoursAhead Int               @db.SmallInt
+  servingHoursAhead     Int               @db.SmallInt
+  createdAt             DateTime          @db.Timestamptz() @default(now())
+  updatedAt             DateTime          @db.Timestamptz() @updatedAt
+
+  @@unique([courtId, clubUserTypeId])
+}
+
+model BookingRangeByDay {
+  id                String          @id @default(cuid())
+  dayOfWeek         String          @db.VarChar(63) @unique
+  startTimeHour     Int             @db.SmallInt
+  startTimeMinute   Int             @db.SmallInt
+  endTimeHour       Int             @db.SmallInt
+  endTimeMinute     Int             @db.SmallInt
+  createdAt         DateTime        @db.Timestamptz() @default(now())
+  updatedAt         DateTime        @db.Timestamptz() @updatedAt
+}
+
+// Transactions
+model Transaction {
+  id                String          @id @default(cuid())
+  title             String          @db.VarChar(255)
+  shortDescription  String?
+  description       String?
+  status            String          @db.VarChar(64)
+  isPst             Boolean
+  isGst             Boolean
+  gstAmount         Float
+  pstAmount         Float
+  subtotal          Float
+  total             Float
+  dueDatetime       DateTime?       @db.Timestamptz()
+  serviceDatetime   DateTime?       @db.Timestamptz()
+  clubUser          ClubUser        @relation(fields: [clubUserId], references: [id])
+  clubUserId        String
+  paymentMethod     PaymentMethod?  @relation(fields: [paymentMethodId], references: [id])
+  paymentMethodId   String?
+  feeType           FeeType         @relation(fields: [feeTypeId], references: [id])
+  feeTypeId         String
+  glCode            GlCode          @relation(fields: [glCodeId], references: [id])
+  session           Session?        @relation(fields: [sessionId], references: [id])
+  sessionId         String?
+  glCodeId          String
+  paidDatetime      DateTime?       @db.Timestamptz()
+  createdAt         DateTime        @db.Timestamptz() @default(now())
+  updatedAt         DateTime        @db.Timestamptz() @updatedAt
+
+  
+}
+
+model PaymentMethod {
+  id                String        @id @default(cuid())
+  name              String        @db.VarChar(255) @unique
+  description       String
+  transactions      Transaction[]
+  createdAt         DateTime      @db.Timestamptz() @default(now())
+  updatedAt         DateTime      @db.Timestamptz() @updatedAt
+}
+
+model FeeType {
+  id                String        @id @default(cuid())
+  type              String        @db.VarChar(255)
+  subtype           String        @db.VarChar(255)
+  transactions      Transaction[]
+  createdAt         DateTime      @db.Timestamptz() @default(now())
+  updatedAt         DateTime      @db.Timestamptz() @updatedAt
+
+  @@unique([type, subtype])
+}
+
+model GlCode {
+  id                String        @id @default(cuid())
+  number            Int           @db.SmallInt @unique
+  description       String
+  category          String
+  transactions      Transaction[]
+  createdAt         DateTime      @db.Timestamptz() @default(now())
+  updatedAt         DateTime      @db.Timestamptz() @updatedAt
+}
+
+model TransactionSettings {
+  id                String        @id @default(cuid())
+  name              String        @db.VarChar(63) @unique
+  value             String
+  description       String
+  createdAt         DateTime      @db.Timestamptz() @default(now())
+  updatedAt         DateTime      @db.Timestamptz() @updatedAt
+}
