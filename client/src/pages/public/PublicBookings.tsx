@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState } from "react";
 import {
   Box,
   CircularProgress,
@@ -14,13 +15,14 @@ import { Link } from "react-router-dom";
 import PublicDrawer from "../../layouts/components/PublicDrawer";
 import PublicNavBottom from "../../layouts/components/PublicNavBottom";
 
-import BookingCard from "../../features/bookings/components/BookingCard";
+import PublicBookingCard from "../../features/bookings/components/PublicBookingCard";
 
 // Icons
 import BookOnlineIcon from "@mui/icons-material/BookOnline";
+
 import { getSession } from "../../features/auth/auth";
-import { useEffect, useState } from "react";
 import axios from "axios";
+import dayjs from "dayjs";
 
 const paperBackgroundColor: string = "#E7E9E2";
 
@@ -30,6 +32,12 @@ function PublicBookings() {
 
   const queryDashboard = async () => {
     setBusy(true);
+
+    // Set datetime without timezone
+    const normalizedDateString = dayjs()
+      .tz("Canada/Pacific") // Set timezone to club's physical location
+      .format("YYYY-MM-DDTHH:MM:ss+00:00");
+    const currentDate = dayjs(normalizedDateString).utc();
 
     try {
       getSession()
@@ -41,7 +49,13 @@ function PublicBookings() {
           });
         })
         .then((result) => {
-          setBookings(result.data.bookings);
+          setBookings(
+            result.data.bookings.filter((booking: any) => {
+              const bookingTime = dayjs.utc(booking.datetime);
+
+              return bookingTime.isAfter(currentDate);
+            })
+          );
           setBusy(false);
         });
     } catch (e) {
@@ -90,11 +104,12 @@ function PublicBookings() {
               </Typography>
               {bookings?.length ? (
                 bookings.map((booking) => (
-                  <BookingCard
+                  <PublicBookingCard
                     bookingID={booking.id}
                     bookingColor={booking.bookingType.color}
                     bookingDatetime={booking.datetime}
                     bookingDuration={booking.duration}
+                    courtNumber={booking.court.name}
                     players={booking.players}
                   />
                 ))

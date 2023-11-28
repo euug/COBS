@@ -1,4 +1,5 @@
 const express = require("express");
+const prisma = require("./prisma/db.js");
 const programRoutes = require("./routes/programs/programs");
 const registerRoutes = require("./routes/register/register");
 const clubUserRoutes = require("./routes/club_user/clubUser");
@@ -13,6 +14,25 @@ app.use("/register", registerRoutes);
 app.use("/clubuser", clubUserRoutes);
 app.use("/transactions", transactionRoutes);
 app.use("/bookings", bookingRoutes);
+
+app.delete("/reset", async (req, res) => {
+  console.log("inside reset method");
+
+  try {
+    await prisma.booking.deleteMany({});
+    await prisma.transaction.deleteMany({});
+
+    return res.status(200).send({
+      success: true,
+      message: "Successfully reset",
+    });
+  } catch (e) {
+    return res.status(500).send({
+      success: false,
+      message: "Unable to reset: " + e,
+    });
+  }
+});
 
 const port = 3000;
 app.listen(port);

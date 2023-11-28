@@ -6,9 +6,12 @@ const isSameOrBefore = require("dayjs/plugin/isSameOrBefore");
 dayjs.extend(isSameOrBefore);
 dayjs.extend(utc);
 
-exports.formatBookings = async (bookingData, clubUserType, date) => {
-  const currentTime = dayjs(new Date()).format("MMMM DD YYYY, HH:MM");
-
+exports.formatBookings = async (
+  bookingData,
+  clubUserType,
+  date,
+  currentTimestamp
+) => {
   try {
     let formattedList = {};
 
@@ -29,29 +32,35 @@ exports.formatBookings = async (bookingData, clubUserType, date) => {
       },
     });
 
-    console.log(courtRules);
+    const bookingRange = await prisma.bookingRangeByDay.findMany({});
 
-    const bookingRange = await prisma.bookingRangeByDay.findMany();
+    const startTime = dayjs
+      .utc(
+        bookingRange.find((day) => day.dayOfWeek == date.format("dddd"))
+          .startTime
+      )
+      .year(date.year())
+      .month(date.month())
+      .date(date.date());
 
-    const start = dayjs(
-      bookingRange.find((day) => day.dayOfWeek == date.format("dddd")).startTime
-    ).hour();
-
-    const end = dayjs(
-      bookingRange.find((day) => day.dayOfWeek == date.format("dddd")).endTime
-    ).hour();
+    const endTime = dayjs
+      .utc(
+        bookingRange.find((day) => day.dayOfWeek == date.format("dddd")).endTime
+      )
+      .year(date.year())
+      .month(date.month())
+      .date(date.date());
 
     courtRules.forEach((court) => {
       const bookings = bookingData.filter((b) => {
-        return b.court.id == court.court.id;
+        return b.court.id == court.courtId;
       });
 
-      let loop = date.startOf("d").hour(start);
-      const endLoop = date.startOf("d").hour(end);
+      let loop = startTime;
 
-      while (loop.isBefore(endLoop)) {
+      while (loop.isBefore(endTime)) {
         let loopBooking = bookings.find((b) => {
-          return loop.isSame(dayjs(b.datetime));
+          return loop.isSame(dayjs.utc(b.datetime));
         });
 
         if (loopBooking) {
@@ -81,8 +90,8 @@ exports.formatBookings = async (bookingData, clubUserType, date) => {
         } else {
           const bookableTime = loop.subtract(court.freeHoursAhead, "hour");
 
-          const isBookable = bookableTime.isBefore(currentTime)
-            ? loop.isAfter(currentTime)
+          const isBookable = bookableTime.isBefore(currentTimestamp)
+            ? loop.isAfter(currentTimestamp)
               ? true
               : false
             : false;
@@ -93,7 +102,7 @@ exports.formatBookings = async (bookingData, clubUserType, date) => {
           )
             ? formattedList[`${court.court.name}`].push({
                 court: court.court,
-                datetime: loop.toDate(),
+                datetime: loop.toISOString(),
                 duration: Number(bookingIncrement.value),
                 isBooked: false,
                 canBook: isBookable,
@@ -102,14 +111,14 @@ exports.formatBookings = async (bookingData, clubUserType, date) => {
             : ((formattedList[`${court.court.name}`] = []),
               formattedList[`${court.court.name}`].push({
                 court: court.court,
-                datetime: loop.toDate(),
+                datetime: loop.toISOString(),
                 duration: Number(bookingIncrement.value),
                 isBooked: false,
                 canBook: isBookable,
                 bookableTime: bookableTime,
               }));
 
-          loop = loop.add(bookingIncrement.value, "minute");
+          loop = loop.add(Number(bookingIncrement.value), "minute");
         }
       }
     });

@@ -76,7 +76,7 @@ function RegistrationContact() {
               index={index}
               fullName={`${member["firstName"]} ${member["lastName"]}`}
               firstLetter={member["firstName"].charAt(0)}
-              dateBirth={member["dateBirth"]}
+              dateBirth={member["dateOfBirth"]}
             />
           ))}
         </Stack>

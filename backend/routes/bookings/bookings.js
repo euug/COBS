@@ -7,6 +7,7 @@ const dayjs = require("dayjs");
 const utc = require("dayjs/plugin/utc");
 const { formatBookings } = require("./formatBookings.js");
 const { publicCheck } = require("./sanityChecks.js");
+const { publicRules } = require("./publicRules.js");
 
 dayjs.extend(utc);
 
@@ -15,32 +16,49 @@ const router = express.Router();
 router
   .route("/")
   .post(async (req, res) => {
+    // Normalize current date
+    const normalizedDateString = dayjs()
+      .tz(process.env.TZ) // Set timezone to club's physical location
+      .format("YYYY-MM-DDTHH:MM:ss+00:00");
+
+    const currentDate = dayjs(normalizedDateString).utc();
+
     const validateResponse = await validateAuth(req.headers.authorization);
 
     if (validateResponse.success) {
       if (validateResponse.response["cognito:groups"][0] == "Public") {
-        // const sanityCheck = await publicCheck(
-        //   req.body.datetime,
-        //   req.body.court,
-        //   req.body.players,
-        //   60
-        // );
-        const sanityCheck = { success: true };
+        const sanityCheck = await publicCheck(
+          req.body.datetime,
+          req.body.court,
+          req.body.players,
+          60
+        );
 
         console.log(sanityCheck);
 
-        if (sanityCheck.success) {
-          const currentUser = await prisma.clubUser.findFirst({
-            where: {
-              email: req.body.currentUser,
-            },
-          });
+        if (!sanityCheck.success) {
+          res.status(500).send(sanityCheck);
+          return;
+        }
 
-          const otherPlayerIds = req.body.players.map((p) => {
+        const publicRulesCheck = await publicRules(
+          req.body.datetime,
+          req.body.court,
+          req.body.players,
+          60
+        );
+
+        console.log(publicRulesCheck);
+
+        if (!publicRulesCheck.success) {
+          res.status(500).send(publicRulesCheck);
+          return;
+        }
+
+        if (sanityCheck.success && publicRulesCheck.success) {
+          const allPlayerIds = req.body.players.map((p) => {
             return p.id;
           });
-
-          const allPlayerIds = [...otherPlayerIds, currentUser.id];
 
           await prisma.booking
             .create({
@@ -89,7 +107,7 @@ router
         } else {
           res.status(500).send({
             success: false,
-            message: sanityCheck.message,
+            message: "Invalid booking",
           });
         }
       }
@@ -102,12 +120,22 @@ router
   })
 
   .get(async (req, res) => {
-    const validateResponse = await validateAuth(req.headers.authorization);
+    // Normalize current date
+    const normalizedDateString = dayjs()
+      .tz(process.env.TZ) // Set timezone to club's physical location
+      .format("YYYY-MM-DDTHH:MM:ss+00:00");
 
-    const currentDate = dayjs(new Date());
+    const currentDate = dayjs(normalizedDateString).utc();
+
+    // Validate logged in user
+    const validateResponse = await validateAuth(req.headers.authorization);
 
     let bookingData;
 
+    // Check user's type
+    console.log(validateResponse.response["cognito:groups"]);
+
+    // Query if user is a Member type
     if (
       validateResponse.success &&
       validateResponse.response["cognito:groups"] == "Member"
@@ -135,6 +163,7 @@ router
         });
       }
 
+      // Default query for current day
       if (bookingData === undefined) {
         bookingData = await prisma.booking.findMany({
           where: {
@@ -153,7 +182,9 @@ router
           },
         });
       }
-    } else {
+    }
+    // Non-member query
+    else {
       if (req.query.offset) {
         bookingData = await prisma.booking.findMany({
           where: {
@@ -176,6 +207,7 @@ router
         });
       }
 
+      // Default gets current day's bookings
       if (bookingData === undefined) {
         bookingData = await prisma.booking.findMany({
           where: {
@@ -201,7 +233,8 @@ router
       responseData = await formatBookings(
         bookingData,
         validateResponse.response["cognito:groups"][0],
-        currentDate.add(req.query.offset, "day").startOf("day")
+        currentDate.add(req.query.offset, "day").startOf("day"),
+        currentDate
       );
     } catch (e) {
       return res.status(200).send({
@@ -214,9 +247,41 @@ router
       });
     }
 
-    console.log(responseData);
-
     res.json(responseData);
   });
+
+router.route("/bookingRangeByDay").get(async (req, res) => {
+  let responseData;
+
+  if (req.query.currentDate) {
+    const bookingRange = await prisma.bookingRangeByDay.findUnique({
+      where: {
+        dayOfWeek: dayjs.utc(req.query.currentDate).format("dddd"),
+      },
+    });
+
+    const startTime = dayjs.utc(bookingRange.startTime);
+    const endTime = dayjs.utc(bookingRange.endTime);
+
+    let loop = startTime;
+    let rangeArray = [];
+
+    while (loop.isBefore(endTime)) {
+      rangeArray.push(loop.format("h:mm a"));
+
+      loop = loop.add(60, "minute");
+    }
+
+    responseData = rangeArray;
+  }
+
+  if (responseData === undefined) {
+    responseData = await prisma.bookingRangeByDay.findMany({});
+  }
+
+  console.log(responseData);
+
+  res.json(responseData);
+});
 
 module.exports = router;

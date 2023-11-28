@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Box,
   Typography,
@@ -17,8 +18,13 @@ import { useState } from "react";
 
 import PeopleIcon from "@mui/icons-material/People";
 import AddIcon from "@mui/icons-material/Add";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(utc);
 
 interface clinic {
+  dayOfWeek: string;
   name: string;
   session: number;
   price: number;
@@ -28,6 +34,8 @@ interface clinic {
   weeks: number;
   id: string;
   registered: boolean;
+  startDate: string;
+  endDate: string;
 }
 
 function SessionCard(props: clinic) {
@@ -43,7 +51,7 @@ function SessionCard(props: clinic) {
 
   return (
     <>
-      {/* Join Waitlist Dialog */}
+      {/* Join Waitlist Dialog TODO */}
       <Dialog open={openList} onClose={handleCloseList}>
         <DialogTitle>Clinic Waitlist</DialogTitle>
         <DialogContent>
@@ -73,10 +81,12 @@ function SessionCard(props: clinic) {
             <Stack direction="row" spacing={8} mt={1}>
               <Box>
                 <Typography variant="body2">
-                  <strong>Day of week</strong>: Monday
+                  <strong>Day of week</strong>: {props.dayOfWeek}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Time</strong>: 6:00pm - 7:00pm
+                  <strong>Time</strong>:{" "}
+                  {dayjs.utc(props.startDate).format("h:mma")} -{" "}
+                  {dayjs.utc(props.endDate).format("h:mma")}
                 </Typography>
                 <Typography variant="body2">
                   <strong>Number of sessions</strong>: {props.weeks}

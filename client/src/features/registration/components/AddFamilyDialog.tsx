@@ -70,7 +70,7 @@ function AddFamilyDialog(props: {
     const newFamily = {
       firstName: data.firstName,
       lastName: data.lastName,
-      dateBirth: data.dateOfBirth,
+      dateOfBirth: data.dateOfBirth,
       gender: data.gender,
       allergiesMedications: data.allergiesMedications,
       conditionsDisabilities: data.conditionsDisabilities,

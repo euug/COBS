@@ -1,20 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  Box,
-  Typography,
-  Card,
-  CardActions,
-  CardContent,
-  IconButton,
-  Stack,
-} from "@mui/material";
+import { Box, Typography, Card, CardContent, Stack } from "@mui/material";
 
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-
-// Icons
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 
 const borderColor: string = "#DCDCDC";
 
@@ -25,10 +13,11 @@ interface BookingProps {
   bookingColor: string;
   bookingDatetime: string;
   bookingDuration: number;
+  courtNumber: string;
   players: any[];
 }
 
-function BookingCard(props: BookingProps) {
+function PublicBookingCard(props: BookingProps) {
   function getBookingTimeRange(datetime: string, duration: number) {
     const startTime = dayjs.utc(datetime).format("h:mmA");
     const endTime = dayjs.utc(datetime).add(duration, "minute").format("h:mmA");
@@ -52,7 +41,12 @@ function BookingCard(props: BookingProps) {
           borderColor: borderColor,
         }}
       />
-      <Stack direction="row" justifyContent="space-between">
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        px={2}
+      >
         <CardContent sx={{ width: "70%" }}>
           <Stack direction="row" justifyContent="space-between">
             <Typography sx={{ fontWeight: "bold" }}>
@@ -63,7 +57,7 @@ function BookingCard(props: BookingProps) {
                 props.bookingDuration
               )}
             </Typography>
-            <Stack direction="column">
+            <Stack direction="column" justifyContent="center">
               {props.players.map((p) => (
                 <Typography key={p.id} variant="body2">
                   {`${p.firstName} ${p.lastName}`}
@@ -72,19 +66,22 @@ function BookingCard(props: BookingProps) {
             </Stack>
           </Stack>
         </CardContent>
-        <CardActions>
-          {/* TODO: Add Booking Edit Modals */}
+        <Box display="flex" justifyContent="center">
+          <Typography sx={{ fontWeight: "bold" }} variant="body2">
+            {props.courtNumber}
+          </Typography>
+        </Box>
+        {/* <CardActions>
           <IconButton color="primary" aria-label="edit booking">
             <EditIcon />
           </IconButton>
-          {/* TODO: Delete booking with BookingID */}
           <IconButton color="error" aria-label="delete booking">
             <DeleteIcon />
           </IconButton>
-        </CardActions>
+        </CardActions> */}
       </Stack>
     </Card>
   );
 }
 
-export default BookingCard;
+export default PublicBookingCard;

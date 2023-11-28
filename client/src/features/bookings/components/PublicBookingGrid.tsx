@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import {
@@ -25,6 +26,8 @@ dayjs.extend(isBetween);
 
 function PublicBookingGrid() {
   const [bookings, setBookings] = useState<any>({});
+  const [currentUser, setCurrentUser] = useState<any>({});
+  const [bookingRange, setBookingRange] = useState<any>();
   const [isBusy, setBusy] = useState(true);
   const [day, setDay] = useState(0);
   const currentDate = dayjs(new Date()).startOf("day");
@@ -36,25 +39,52 @@ function PublicBookingGrid() {
   const listCourts = async () => {
     setBusy(true);
 
+    // Normalize current date
+    const normalizedDateString = dayjs()
+      .tz("Canada/Pacific") // Set timezone to club's physical location
+      .format("YYYY-MM-DDTHH:MM:ss+00:00");
+
+    // const currentDate = dayjs(normalizedDateString).utc();
+
     try {
+      const session: any = await getSession();
+
       // Query bookings within date range
-      await getSession()
-        .then((result: any) => {
-          return axios("http://localhost:3000/bookings", {
-            headers: {
-              Authorization: `${result.accessToken.jwtToken}`,
-            },
-            params: {
-              offset: day,
-            },
-          });
-        })
-        .then((result: any) => {
-          console.log(result);
-          // Set state to payments
-          setBookings(result.data);
-          console.log(bookings);
-        });
+      const bookings: any = await axios("http://localhost:3000/bookings", {
+        headers: {
+          Authorization: `${session.accessToken.jwtToken}`,
+        },
+        params: {
+          offset: day,
+        },
+      });
+
+      setBookings(bookings.data);
+
+      // Query business hours of current date
+      const bookingRangeRes: any = await axios(
+        "http://localhost:3000/bookings/bookingRangeByDay",
+        {
+          params: {
+            currentDate: normalizedDateString,
+          },
+        }
+      );
+
+      setBookingRange(bookingRangeRes.data);
+      console.log(bookingRange);
+
+      // Query current user's data
+      const currentUser = await axios(
+        "http://localhost:3000/clubuser/current-user",
+        {
+          headers: {
+            Authorization: `${session.accessToken.jwtToken}`,
+          },
+        }
+      );
+
+      setCurrentUser(currentUser.data);
     } catch (e) {
       console.log(e);
     }
@@ -93,6 +123,23 @@ function PublicBookingGrid() {
         <Paper elevation={8} sx={{ px: 1, mt: 4 }}>
           <Stack direction="row" width="100%" justifyContent="space-around">
             <Stack
+              justifyContent="flex-start"
+              width="100%"
+              minWidth={100}
+              maxWidth={100}
+              spacing={1}
+              px={1}
+              pt="40px"
+            >
+              {bookingRange.map((br: any) => {
+                return (
+                  <Box height={bookingHeight * 2 + 8}>
+                    <Typography variant="body1">{br}</Typography>
+                  </Box>
+                );
+              })}
+            </Stack>
+            <Stack
               justifyContent="center"
               width="100%"
               minWidth={bookingWidth}
@@ -108,12 +155,15 @@ function PublicBookingGrid() {
                     fullWidth
                     variant="contained"
                     disableElevation
+                    disableRipple
+                    disableFocusRipple
                     sx={{
                       borderRadius: 1,
                       backgroundColor: booking.color,
                       height:
                         (booking.duration / increment) * bookingHeight +
                         8 * (booking.duration / increment - 1),
+                      "&:hover": { backgroundColor: booking.color },
                     }}
                   />
                 ) : (
@@ -124,6 +174,7 @@ function PublicBookingGrid() {
                     canBook={booking.canBook}
                     court={booking.court}
                     bookableTime={booking.bookableTime}
+                    userFullName={`${currentUser.firstName} ${currentUser.lastName}`}
                   />
                 );
               })}
@@ -144,22 +195,26 @@ function PublicBookingGrid() {
                     fullWidth
                     variant="contained"
                     disableElevation
+                    disableRipple
+                    disableFocusRipple
                     sx={{
                       borderRadius: 1,
                       backgroundColor: booking.color,
                       height:
                         (booking.duration / increment) * bookingHeight +
                         8 * (booking.duration / increment - 1),
+                      "&:hover": { backgroundColor: booking.color },
                     }}
                   />
                 ) : (
                   <AddBookingButton
-                    key={booking.datetime + booking.court.id}
+                    key={booking.id}
                     height={bookingHeight}
-                    court={booking.court}
                     datetime={booking.datetime}
                     canBook={booking.canBook}
+                    court={booking.court}
                     bookableTime={booking.bookableTime}
+                    userFullName={`${currentUser.firstName} ${currentUser.lastName}`}
                   />
                 );
               })}
@@ -180,22 +235,26 @@ function PublicBookingGrid() {
                     fullWidth
                     variant="contained"
                     disableElevation
+                    disableRipple
+                    disableFocusRipple
                     sx={{
                       borderRadius: 1,
                       backgroundColor: booking.color,
                       height:
                         (booking.duration / increment) * bookingHeight +
                         8 * (booking.duration / increment - 1),
+                      "&:hover": { backgroundColor: booking.color },
                     }}
                   />
                 ) : (
                   <AddBookingButton
-                    key={booking.datetime + booking.court.id}
-                    court={booking.court}
+                    key={booking.id}
                     height={bookingHeight}
                     datetime={booking.datetime}
                     canBook={booking.canBook}
+                    court={booking.court}
                     bookableTime={booking.bookableTime}
+                    userFullName={`${currentUser.firstName} ${currentUser.lastName}`}
                   />
                 );
               })}
@@ -216,22 +275,26 @@ function PublicBookingGrid() {
                     fullWidth
                     variant="contained"
                     disableElevation
+                    disableRipple
+                    disableFocusRipple
                     sx={{
                       borderRadius: 1,
                       backgroundColor: booking.color,
                       height:
                         (booking.duration / increment) * bookingHeight +
                         8 * (booking.duration / increment - 1),
+                      "&:hover": { backgroundColor: booking.color },
                     }}
                   />
                 ) : (
                   <AddBookingButton
-                    key={booking.datetime + booking.court.id}
-                    court={booking.court}
+                    key={booking.id}
                     height={bookingHeight}
                     datetime={booking.datetime}
                     canBook={booking.canBook}
+                    court={booking.court}
                     bookableTime={booking.bookableTime}
+                    userFullName={`${currentUser.firstName} ${currentUser.lastName}`}
                   />
                 );
               })}
@@ -252,22 +315,26 @@ function PublicBookingGrid() {
                     fullWidth
                     variant="contained"
                     disableElevation
+                    disableRipple
+                    disableFocusRipple
                     sx={{
                       borderRadius: 1,
                       backgroundColor: booking.color,
                       height:
                         (booking.duration / increment) * bookingHeight +
                         8 * (booking.duration / increment - 1),
+                      "&:hover": { backgroundColor: booking.color },
                     }}
                   />
                 ) : (
                   <AddBookingButton
-                    key={booking.datetime + booking.court.id}
-                    court={booking.court}
+                    key={booking.id}
                     height={bookingHeight}
                     datetime={booking.datetime}
                     canBook={booking.canBook}
+                    court={booking.court}
                     bookableTime={booking.bookableTime}
+                    userFullName={`${currentUser.firstName} ${currentUser.lastName}`}
                   />
                 );
               })}
@@ -288,22 +355,26 @@ function PublicBookingGrid() {
                     fullWidth
                     variant="contained"
                     disableElevation
+                    disableRipple
+                    disableFocusRipple
                     sx={{
                       borderRadius: 1,
                       backgroundColor: booking.color,
                       height:
                         (booking.duration / increment) * bookingHeight +
                         8 * (booking.duration / increment - 1),
+                      "&:hover": { backgroundColor: booking.color },
                     }}
                   />
                 ) : (
                   <AddBookingButton
-                    key={booking.datetime + booking.court.id}
-                    court={booking.court}
+                    key={booking.id}
                     height={bookingHeight}
                     datetime={booking.datetime}
                     canBook={booking.canBook}
+                    court={booking.court}
                     bookableTime={booking.bookableTime}
+                    userFullName={`${currentUser.firstName} ${currentUser.lastName}`}
                   />
                 );
               })}

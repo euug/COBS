@@ -162,6 +162,7 @@ model Booking {
   datetime      DateTime    @db.Timestamptz()
   duration      Int         @db.SmallInt
   checkRules    Boolean
+  bookingStatus String      @db.VarChar(63) @default("Booked")
   bookingType   BookingType @relation(fields: [bookingTypeId], references: [id])
   bookingTypeId String
   court         Court       @relation(fields: [courtId], references: [id])
@@ -199,10 +200,8 @@ model CourtBookingRules {
 model BookingRangeByDay {
   id                String          @id @default(cuid())
   dayOfWeek         String          @db.VarChar(63) @unique
-  startTimeHour     Int             @db.SmallInt
-  startTimeMinute   Int             @db.SmallInt
-  endTimeHour       Int             @db.SmallInt
-  endTimeMinute     Int             @db.SmallInt
+  startTime         DateTime        @db.Time() @default("2023-11-04T08:00:00Z")
+  endTime           DateTime        @db.Time() @default("2023-11-04T08:00:00Z")
   createdAt         DateTime        @db.Timestamptz() @default(now())
   updatedAt         DateTime        @db.Timestamptz() @updatedAt
 }

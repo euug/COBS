@@ -16,6 +16,8 @@ import {
   Box,
   IconButton,
   Divider,
+  Alert,
+  Collapse,
 } from "@mui/material";
 import dayjs from "dayjs";
 
@@ -24,9 +26,11 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import StarIcon from "@mui/icons-material/Star";
+import CloseIcon from "@mui/icons-material/Close";
 
 import axios from "axios";
 import { getSession } from "../../auth/auth";
+import { useNavigate } from "react-router-dom";
 
 function PublicAddBookingButton(props: {
   height: number;
@@ -34,7 +38,10 @@ function PublicAddBookingButton(props: {
   canBook: boolean;
   bookableTime: string;
   court: any;
+  userFullName: string;
 }) {
+  const navigate = useNavigate();
+
   const [open, setOpen] = useState(false);
 
   const [openAC2, setOpenAC2] = useState(false);
@@ -42,9 +49,14 @@ function PublicAddBookingButton(props: {
   const [openAC4, setOpenAC4] = useState(false);
   const [options, setOptions] = useState<any>([]);
   const loading = (openAC2 || openAC3 || openAC4) && options.length === 0;
+  const [processing, setProcessing] = useState(false);
+
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [bookingError, setBookingError] = useState("");
 
   // Form Inputs
   const [duration, setDuration] = useState("60");
+  const [player1, setPlayer1] = useState<any>();
   const [players, setPlayers] = useState(2);
   const [player2, setPlayer2] = useState();
   const [player3, setPlayer3] = useState();
@@ -73,6 +85,8 @@ function PublicAddBookingButton(props: {
           }
         );
 
+        setPlayer1(currentUser.data);
+
         const listClubUsers: any = await axios(
           "http://localhost:3000/clubuser",
           {
@@ -83,7 +97,6 @@ function PublicAddBookingButton(props: {
         );
 
         if (active) {
-          console.log(listClubUsers);
           setOptions(
             listClubUsers.data.map((player: any) => {
               return {
@@ -107,15 +120,16 @@ function PublicAddBookingButton(props: {
   }, [loading]);
 
   const handleSubmit = async () => {
+    setProcessing(true);
     const session: any = await getSession();
 
-    await axios
-      .post(
+    try {
+      await axios.post(
         "http://localhost:3000/bookings",
         {
           datetime: props.datetime,
           court: props.court,
-          players: [player2, player3, player4].filter((p) => p),
+          players: [player1, player2, player3, player4].filter((p) => p),
           currentUser: session.idToken.payload.email,
         },
         {
@@ -123,11 +137,15 @@ function PublicAddBookingButton(props: {
             Authorization: `${session.accessToken.jwtToken}`,
           },
         }
-      )
-      .then((response) => {
-        console.log(response);
-        response.data.success ? handleClose() : alert("Failed to book");
-      });
+      );
+
+      setProcessing(false);
+      navigate(0);
+    } catch (e: any) {
+      setProcessing(false);
+      setBookingError(e.response.data.message);
+      setAlertOpen(true);
+    }
   };
 
   const handleOpen = () => {
@@ -199,7 +217,9 @@ function PublicAddBookingButton(props: {
         }}
         onClick={handleOpen}
       >
-        {props.canBook ? "Book" : `Unavailable`}
+        {props.canBook
+          ? `Book ${dayjs.utc(props.datetime).format("h:mm a")}`
+          : `Unavailable`}
       </Button>
 
       <Dialog fullWidth fullScreen onClose={handleClose} open={open}>
@@ -207,11 +227,31 @@ function PublicAddBookingButton(props: {
           <Typography variant="h3">Book a court</Typography>
         </DialogTitle>
         <DialogContent>
+          <Collapse in={alertOpen}>
+            <Alert
+              severity="error"
+              action={
+                <IconButton
+                  aria-label="close"
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    setAlertOpen(false);
+                  }}
+                >
+                  <CloseIcon fontSize="inherit" />
+                </IconButton>
+              }
+              sx={{ mb: 2 }}
+            >
+              {bookingError}
+            </Alert>
+          </Collapse>
           <Typography variant="body1">Booking Details</Typography>
           <Stack direction="row" spacing={2} mb={2}>
             <Stack alignItems="end">
               <Typography variant="body2">
-                <strong>Booking Type:</strong>
+                <strong>Court:</strong>
               </Typography>
               <Typography variant="body2">
                 <strong>Date:</strong>
@@ -219,15 +259,19 @@ function PublicAddBookingButton(props: {
               <Typography variant="body2">
                 <strong>Start Time:</strong>
               </Typography>
+              <Typography variant="body2">
+                <strong>Booking Type:</strong>
+              </Typography>
             </Stack>
             <Stack alignItems="start">
+              <Typography variant="body2">{props.court.name}</Typography>
+              <Typography variant="body2">
+                {dayjs.utc(props.datetime).format("ddd MMM D, YYYY")}
+              </Typography>
+              <Typography variant="body2">
+                {dayjs.utc(props.datetime).format("h:mmA")}
+              </Typography>
               <Typography variant="body2">Public</Typography>
-              <Typography variant="body2">
-                {dayjs(props.datetime).format("ddd MMM D, YYYY")}
-              </Typography>
-              <Typography variant="body2">
-                {dayjs(props.datetime).format("h:mmA")}
-              </Typography>
             </Stack>
           </Stack>
           <Typography mb={0} variant="body1">
@@ -237,9 +281,14 @@ function PublicAddBookingButton(props: {
             <TextField
               fullWidth
               disabled
-              value="Eugene Joy"
+              value={props.userFullName}
               InputProps={{
                 readOnly: true,
+              }}
+              sx={{
+                "& .MuiInputBase-input.Mui-disabled": {
+                  WebkitTextFillColor: "#000000",
+                },
               }}
             />
             <Stack
@@ -254,7 +303,7 @@ function PublicAddBookingButton(props: {
                 id="player-2"
                 popupIcon={null}
                 value={player2}
-                onChange={(event: any, newValue: any | null) => {
+                onChange={(_event: any, newValue: any | null) => {
                   if (newValue) {
                     setFavourite2(newValue?.favourite);
                   }
@@ -337,7 +386,7 @@ function PublicAddBookingButton(props: {
                 id="player-3"
                 popupIcon={null}
                 value={player3}
-                onChange={(event: any, newValue: any | null) => {
+                onChange={(_event: any, newValue: any | null) => {
                   if (newValue) {
                     setFavourite3(newValue?.favourite);
                   }
@@ -420,7 +469,7 @@ function PublicAddBookingButton(props: {
                 id="player-4"
                 popupIcon={null}
                 value={player4}
-                onChange={(event: any, newValue: any | null) => {
+                onChange={(_event: any, newValue: any | null) => {
                   if (newValue) {
                     setFavourite4(newValue?.favourite);
                   }
@@ -518,7 +567,7 @@ function PublicAddBookingButton(props: {
           <ToggleButtonGroup
             color="primary"
             value={duration}
-            onChange={(event, newDuration) => setDuration(newDuration)}
+            onChange={(_event, newDuration) => setDuration(newDuration)}
             exclusive
             size="small"
           >
@@ -532,11 +581,20 @@ function PublicAddBookingButton(props: {
               2 hr
             </ToggleButton>
           </ToggleButtonGroup>
-          <Stack mt={4} direction="row" justifyContent="start" spacing={4}>
+          <Stack
+            mt={4}
+            direction="row"
+            justifyContent="start"
+            spacing={4}
+            alignItems="center"
+          >
             <Button onClick={handleClose}>Cancel</Button>
             <Button onClick={handleSubmit} variant="contained">
               Book
             </Button>
+            <Box display="flex">
+              {processing && <CircularProgress color="info" size={24} />}
+            </Box>
           </Stack>
         </DialogContent>
       </Dialog>

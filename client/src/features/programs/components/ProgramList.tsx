@@ -21,7 +21,7 @@ function ProgramList() {
   const [registeredSessions, setRegisteredSessions] = useState<any>();
   const [isBusy, setBusy] = useState(true);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
@@ -81,7 +81,7 @@ function ProgramList() {
           </Box>
           {tabValue
             ? programs
-                .filter((clinic, index) => {
+                .filter((_clinic, index) => {
                   return index + 1 === tabValue;
                 })
                 .map((clinic, i) => {
@@ -100,6 +100,7 @@ function ProgramList() {
                         }
                         minAge={clinic.minAge}
                         maxAge={clinic.maxAge}
+                        dayOfWeek={session.dayOfWeek[0]}
                         weeks={session.totalWeeks || ""}
                         id={session.id}
                         registered={
@@ -109,6 +110,8 @@ function ProgramList() {
                             ? true
                             : false
                         }
+                        startDate={session.startDatetime}
+                        endDate={session.endDatetime}
                       />
                     );
                   });
@@ -129,6 +132,7 @@ function ProgramList() {
                       }
                       minAge={program.minAge}
                       maxAge={program.maxAge}
+                      dayOfWeek={session.dayOfWeek[0]}
                       weeks={session.totalWeeks || ""}
                       id={session.id}
                       registered={
@@ -138,6 +142,8 @@ function ProgramList() {
                           ? true
                           : false
                       }
+                      startDate={session.startDatetime}
+                      endDate={session.endDatetime}
                     />
                   );
                 });

@@ -14,7 +14,7 @@ function PublicJuniorClinics() {
       <Box sx={{ flexGrow: 1 }}>
         <Container maxWidth="xl" sx={{ mb: 15 }}>
           <Typography variant="h1_home">Junior Clinics</Typography>
-          <ProgramList programid="8f0f09c2-e1c3-413b-9b89-06c29c8ab171" />
+          <ProgramList />
         </Container>
       </Box>
     </Box>

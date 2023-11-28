@@ -32,7 +32,9 @@ router.route("/").get(async (req, res) => {
           clubUserType: true,
         },
       });
-    } else {
+    }
+    // If user is not a member
+    else {
       responseData = await prisma.clubUser.findMany({
         where: {
           isActive: true,

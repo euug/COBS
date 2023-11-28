@@ -10,32 +10,60 @@ import {
   Button,
   CircularProgress,
 } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // Navigation
 import PublicDrawer from "../../layouts/components/PublicDrawer";
 import PublicNavBottom from "../../layouts/components/PublicNavBottom";
 
 // Custom Components
-import BookingCard from "../../features/bookings/components/BookingCard";
+import PublicBookingCard from "../../features/bookings/components/PublicBookingCard";
 import PendingFeeCard from "../../features/transactions/components/PendingFeeCard";
 
 import { getSession } from "../../features/auth/auth";
 
 // Icons
 import AddIcon from "@mui/icons-material/Add";
+
 import axios from "axios";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const paperBackgroundColor: string = "#E7E9E2";
 
 function PublicDashboard() {
+  const navigate = useNavigate();
+
   const [pendingFees, setPendingFees] = useState<any[]>([]);
   const [clubCredit, setClubCredit] = useState<number>(0);
   const [bookings, setBookings] = useState<any[]>([]);
   const [isBusy, setBusy] = useState(true);
+  const [isResetLoading, setResetLoading] = useState(false);
+
+  const handleReset = async () => {
+    setResetLoading(true);
+
+    const resetRes = await axios.delete("http://localhost:3000/reset");
+
+    console.log(resetRes);
+
+    setResetLoading(false);
+    navigate(0);
+  };
 
   const queryDashboard = async () => {
     setBusy(true);
+
+    // Set datetime without timezone
+    const normalizedDateString = dayjs()
+      .tz("Canada/Pacific") // Set timezone to club's physical location
+      .format("YYYY-MM-DDTHH:MM:ss+00:00");
+    const currentDate = dayjs(normalizedDateString).utc();
+
     try {
       getSession()
         .then((result: any) => {
@@ -53,9 +81,12 @@ function PublicDashboard() {
           );
           setBookings(
             result.data.bookings.filter((booking: any) => {
-              return new Date(booking.datetime) > new Date();
+              const bookingTime = dayjs.utc(booking.datetime);
+
+              return bookingTime.isAfter(currentDate);
             })
           );
+          console.log(bookings);
           setBusy(false);
         });
     } catch (e) {
@@ -98,9 +129,10 @@ function PublicDashboard() {
               </Typography>
               {bookings.length ? (
                 bookings.map((booking) => (
-                  <BookingCard
+                  <PublicBookingCard
                     key={booking.id}
                     bookingID={booking.id}
+                    courtNumber={booking.court.name}
                     bookingColor={booking.bookingType.color}
                     bookingDatetime={booking.datetime}
                     bookingDuration={booking.duration}
@@ -192,6 +224,30 @@ function PublicDashboard() {
                 </Stack>
               </Paper>
             </Stack>
+          </Stack>
+          <Stack display="flex" alignItems="center">
+            <Typography>Testing purposes only</Typography>
+            <Box sx={{ m: 1, position: "relative" }}>
+              <Button
+                variant="contained"
+                disabled={isResetLoading}
+                onClick={handleReset}
+              >
+                Reset all bookings and clinics
+              </Button>
+              {isResetLoading && (
+                <CircularProgress
+                  size={24}
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    marginTop: "-12px",
+                    marginLeft: "-12px",
+                  }}
+                />
+              )}
+            </Box>
           </Stack>
         </Container>
       </Box>
