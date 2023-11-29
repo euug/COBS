@@ -39,7 +39,7 @@ const calculatePst = (total: number, ispst: boolean, pst: number) => {
   return (total * taxPercentTotal) / (1 + taxPercentTotal);
 };
 
-function SessionRegistration() {
+function JuniorSessionRegistration() {
   const navigate = useNavigate();
   const { sessionid } = useParams();
   const [session, setSession] = useState<any>({});
@@ -101,7 +101,7 @@ function SessionRegistration() {
     try {
       setBusy(true);
       // Query session by id
-      axios("http://localhost:3000/programs/adult/" + sessionid).then(
+      axios("http://localhost:3000/programs/junior/" + sessionid).then(
         (response) => {
           console.log(response);
           setSession(response.data);
@@ -353,4 +353,4 @@ function SessionRegistration() {
   );
 }
 
-export default SessionRegistration;
+export default JuniorSessionRegistration;
