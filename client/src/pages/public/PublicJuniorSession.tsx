@@ -4,20 +4,20 @@ import { Box, Container } from "@mui/material";
 import PublicDrawer from "../../layouts/components/PublicDrawer";
 import PublicNavBottom from "../../layouts/components/PublicNavBottom";
 
-import AdultSessionRegistration from "../../features/programs/components/AdultSessionRegistration";
+import JuniorSessionRegistration from "../../features/programs/components/JuniorSessionRegistration";
 
-function PublicAdultSession() {
+function PublicJuniorSession() {
   return (
     <Box sx={{ display: "flex" }}>
       <PublicDrawer page="Programs" />
       <PublicNavBottom page="Programs" />
       <Box sx={{ flexGrow: 1 }}>
         <Container maxWidth="xl" sx={{ mb: 20 }}>
-          <AdultSessionRegistration />
+          <JuniorSessionRegistration />
         </Container>
       </Box>
     </Box>
   );
 }
 
-export default PublicAdultSession;
+export default PublicJuniorSession;

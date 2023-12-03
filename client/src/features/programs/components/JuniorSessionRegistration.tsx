@@ -39,7 +39,7 @@ const calculatePst = (total: number, ispst: boolean, pst: number) => {
   return (total * taxPercentTotal) / (1 + taxPercentTotal);
 };
 
-function SessionRegistration() {
+function JuniorSessionRegistration() {
   const navigate = useNavigate();
   const { sessionid } = useParams();
   const [session, setSession] = useState<any>({});
@@ -62,7 +62,7 @@ function SessionRegistration() {
           .then((result: any) => {
             console.log(result.accessToken);
             return axios.post(
-              import.meta.env.VITE_APP_BACKEND_URL + "/transactions/program",
+              "http://localhost:3000/transactions/program",
               {
                 sessionId: sessionid,
               },
@@ -101,22 +101,21 @@ function SessionRegistration() {
     try {
       setBusy(true);
       // Query session by id
-      axios(
-        import.meta.env.VITE_APP_BACKEND_URL + "/programs/adult/" + sessionid
-      ).then((response) => {
-        console.log(response);
-        setSession(response.data);
+      axios("http://localhost:3000/programs/junior/" + sessionid).then(
+        (response) => {
+          console.log(response);
+          setSession(response.data);
 
-        // Get tax amount
-        axios(
-          import.meta.env.VITE_APP_BACKEND_URL +
-            "/transactions/transaction-settings/tax"
-        ).then((response) => {
-          console.log(response.data);
-          setTax(response.data);
-          setBusy(false);
-        });
-      });
+          // Get tax amount
+          axios(
+            "http://localhost:3000/transactions/transaction-settings/tax"
+          ).then((response) => {
+            console.log(response.data);
+            setTax(response.data);
+            setBusy(false);
+          });
+        }
+      );
 
       console.log(session);
     } catch (e) {
@@ -129,14 +128,11 @@ function SessionRegistration() {
       setBusy2(true);
       getSession()
         .then((result: any) => {
-          return axios(
-            import.meta.env.VITE_APP_BACKEND_URL + "/clubuser/registered",
-            {
-              headers: {
-                Authorization: `${result.accessToken.jwtToken}`,
-              },
-            }
-          );
+          return axios("http://localhost:3000/clubuser/registered", {
+            headers: {
+              Authorization: `${result.accessToken.jwtToken}`,
+            },
+          });
         })
         .then((result) => {
           console.log(result);
@@ -357,4 +353,4 @@ function SessionRegistration() {
   );
 }
 
-export default SessionRegistration;
+export default JuniorSessionRegistration;

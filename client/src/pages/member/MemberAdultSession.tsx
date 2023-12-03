@@ -1,16 +1,16 @@
 import { Box, Container } from "@mui/material";
 
 // Navigation
-import PublicDrawer from "../../layouts/components/PublicDrawer";
-import PublicNavBottom from "../../layouts/components/PublicNavBottom";
+import MemberDrawer from "../../layouts/components/MemberDrawer";
+import MemberNavBottom from "../../layouts/components/MemberNavBottom";
 
 import AdultSessionRegistration from "../../features/programs/components/AdultSessionRegistration";
 
-function PublicAdultSession() {
+function MemberAdultSession() {
   return (
     <Box sx={{ display: "flex" }}>
-      <PublicDrawer page="Programs" />
-      <PublicNavBottom page="Programs" />
+      <MemberDrawer page="Programs" />
+      <MemberNavBottom page="Programs" />
       <Box sx={{ flexGrow: 1 }}>
         <Container maxWidth="xl" sx={{ mb: 20 }}>
           <AdultSessionRegistration />
@@ -20,4 +20,4 @@ function PublicAdultSession() {
   );
 }
 
-export default PublicAdultSession;
+export default MemberAdultSession;

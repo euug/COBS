@@ -39,10 +39,27 @@ import PublicPayments from "./pages/public/PublicPayments";
 import PublicCheckout from "./pages/public/PublicCheckout";
 import PublicReceipt from "./pages/public/PublicReceipt";
 import PublicJuniorClinics from "./pages/public/PublicJuniorClinics";
+import PublicJuniorSession from "./pages/public/PublicJuniorSession";
 import PublicClubCredit from "./pages/public/PublicClubCredit";
 import PublicClubCreditPurchase from "./pages/public/PublicClubCreditPurchase";
 import PublicBookings from "./pages/public/PublicBookings";
-import PublicBookingGrid from "./pages/public/PublicBookCourt";
+import PublicBookCourt from "./pages/public/PublicBookCourt";
+
+// Member Pages
+import MemberProtectedRoute from "./features/auth/protected_routes/MemberProtectedRoute.tsx";
+import MemberDashboard from "./pages/member/MemberDashboard.tsx";
+import MemberPrograms from "./pages/member/MemberPrograms.tsx";
+import MemberAdultClinics from "./pages/member/MemberAdultClinics.tsx";
+import MemberAdultSession from "./pages/member/MemberAdultSession.tsx";
+import MemberJuniorClinics from "./pages/member/MemberJuniorClinics.tsx";
+import MemberJuniorSession from "./pages/member/MemberJuniorSession.tsx";
+import MemberPayments from "./pages/member/MemberPayments.tsx";
+import MemberCheckout from "./pages/member/MemberCheckout.tsx";
+import MemberReceipt from "./pages/member/MemberReceipt.tsx";
+import MemberClubCredit from "./pages/member/MemberClubCredit.tsx";
+import MemberClubCreditPurchase from "./pages/member/MemberClubCreditPurchase.tsx";
+import MemberBookings from "./pages/member/MemberBookings.tsx";
+import MemberBookCourt from "./pages/member/MemberBookCourt.tsx";
 
 const theme = createTheme(appTheme);
 
@@ -107,7 +124,7 @@ function AppRoutes() {
               <Route
                 path=":sessionid"
                 element={
-                  <PublicProtectedRoute children={<PublicAdultSession />} />
+                  <PublicProtectedRoute children={<PublicJuniorSession />} />
                 }
               />
             </Route>
@@ -147,9 +164,87 @@ function AppRoutes() {
             />
             <Route
               path="book"
+              element={<PublicProtectedRoute children={<PublicBookCourt />} />}
+            />
+          </Route>
+        </Route>
+
+        {/* Member Pages */}
+        <Route path="member">
+          <Route
+            index
+            element={<MemberProtectedRoute children={<MemberDashboard />} />}
+          />
+          <Route path="programs">
+            <Route
+              index
+              element={<MemberProtectedRoute children={<MemberPrograms />} />}
+            />
+            <Route path="adult">
+              <Route
+                index
+                element={
+                  <MemberProtectedRoute children={<MemberAdultClinics />} />
+                }
+              />
+              <Route
+                path=":sessionid"
+                element={
+                  <MemberProtectedRoute children={<MemberAdultSession />} />
+                }
+              />
+            </Route>
+            <Route path="junior">
+              <Route
+                index
+                element={
+                  <MemberProtectedRoute children={<MemberJuniorClinics />} />
+                }
+              />
+              <Route
+                path=":sessionid"
+                element={
+                  <MemberProtectedRoute children={<MemberJuniorSession />} />
+                }
+              />
+            </Route>
+          </Route>
+          <Route path="payments">
+            <Route
+              index
+              element={<MemberProtectedRoute children={<MemberPayments />} />}
+            />
+            <Route
+              path=":transactionid"
+              element={<MemberProtectedRoute children={<MemberCheckout />} />}
+            />
+          </Route>
+          <Route path="receipt">
+            <Route
+              path=":transactionid"
+              element={<MemberProtectedRoute children={<MemberReceipt />} />}
+            />
+          </Route>
+          <Route path="clubcredit">
+            <Route
+              index
+              element={<MemberProtectedRoute children={<MemberClubCredit />} />}
+            />
+            <Route
+              path="purchase"
               element={
-                <PublicProtectedRoute children={<PublicBookingGrid />} />
+                <MemberProtectedRoute children={<MemberClubCreditPurchase />} />
               }
+            />
+          </Route>
+          <Route path="bookings">
+            <Route
+              index
+              element={<MemberProtectedRoute children={<MemberBookings />} />}
+            />
+            <Route
+              path="book"
+              element={<MemberProtectedRoute children={<MemberBookCourt />} />}
             />
           </Route>
         </Route>
