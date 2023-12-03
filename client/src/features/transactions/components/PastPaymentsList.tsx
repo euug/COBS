@@ -34,7 +34,7 @@ function PastPaymentsList() {
       // Find current user's payments
       await getSession()
         .then((result: any) => {
-          return axios("http://localhost:3000/transactions", {
+          return axios(import.meta.env.VITE_APP_BACKEND_URL + "/transactions", {
             headers: {
               Authorization: `${result.accessToken.jwtToken}`,
             },

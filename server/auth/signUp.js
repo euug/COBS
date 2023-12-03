@@ -1,4 +1,7 @@
+require("dotenv").config();
+
 const AmazonCognitoIdentity = require("amazon-cognito-identity-js");
+
 const {
   CognitoIdentityProviderClient,
   AdminAddUserToGroupCommand,
@@ -13,12 +16,18 @@ const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
 
 const client = new CognitoIdentityProviderClient({
   region: "ca-central-1",
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
 });
 
 exports.signUpPublic = async function (email, password) {
   const body = await new Promise((resolve, reject) => {
+    console.log("signUp");
     userPool.signUp(email, password, [], null, async function (err, result) {
       if (err) {
+        console.log("inside error");
         reject({
           success: false,
           message: err.message || JSON.stringify(err),

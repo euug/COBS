@@ -31,7 +31,7 @@ function ProgramTypeCard(props: ProgramTypeCardProps) {
         <CardMedia
           component="img"
           height="200"
-          src={`http://localhost:3000/${props.image}`}
+          src={`${import.meta.env.VITE_APP_BACKEND_URL}/${props.image}`}
           alt="adult clinic"
         />
         <CardContent>

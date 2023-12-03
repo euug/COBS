@@ -19,6 +19,7 @@ import AddBookingButton from "./PublicAddBookingButton";
 
 import { getSession } from "../../auth/auth";
 import axios from "axios";
+import { useAppDispatch, useAppSelector } from "../../../hooks/reduxHooks";
 
 //Icons
 
@@ -50,23 +51,27 @@ function PublicBookingGrid() {
       const session: any = await getSession();
 
       // Query bookings within date range
-      const bookings: any = await axios("http://localhost:3000/bookings", {
-        headers: {
-          Authorization: `${session.accessToken.jwtToken}`,
-        },
-        params: {
-          offset: day,
-        },
-      });
+      const bookings: any = await axios(
+        import.meta.env.VITE_APP_BACKEND_URL + "/bookings",
+        {
+          headers: {
+            Authorization: `${session.accessToken.jwtToken}`,
+          },
+          params: {
+            offset: day,
+          },
+        }
+      );
 
       setBookings(bookings.data);
 
       // Query business hours of current date
       const bookingRangeRes: any = await axios(
-        "http://localhost:3000/bookings/bookingRangeByDay",
+        import.meta.env.VITE_APP_BACKEND_URL + "/bookings/bookingRangeByDay",
         {
           params: {
             currentDate: normalizedDateString,
+            offset: day,
           },
         }
       );
@@ -76,7 +81,7 @@ function PublicBookingGrid() {
 
       // Query current user's data
       const currentUser = await axios(
-        "http://localhost:3000/clubuser/current-user",
+        import.meta.env.VITE_APP_BACKEND_URL + "/clubuser/current-user",
         {
           headers: {
             Authorization: `${session.accessToken.jwtToken}`,

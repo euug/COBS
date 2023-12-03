@@ -43,7 +43,8 @@ function Checkout() {
           .then((result: any) => {
             // Get transaction by ID
             return axios.put(
-              `http://localhost:3000/transactions/${transactionid}/pay`,
+              import.meta.env.VITE_APP_BACKEND_URL +
+                `/transactions/${transactionid}/pay`,
               {
                 paymentMethod: paymentMethod,
               },
@@ -75,11 +76,16 @@ function Checkout() {
       getSession()
         .then((result: any) => {
           // Get transaction by ID
-          return axios("http://localhost:3000/transactions/" + transactionid, {
-            headers: {
-              Authorization: `${result.accessToken.jwtToken}`,
-            },
-          });
+          return axios(
+            import.meta.env.VITE_APP_BACKEND_URL +
+              "/transactions/" +
+              transactionid,
+            {
+              headers: {
+                Authorization: `${result.accessToken.jwtToken}`,
+              },
+            }
+          );
         })
         .then((result: any) => {
           console.log(result);

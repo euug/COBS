@@ -29,11 +29,14 @@ function ProgramList() {
     try {
       await getSession()
         .then((result: any) => {
-          return axios("http://localhost:3000/clubuser/registered", {
-            headers: {
-              Authorization: `${result.accessToken.jwtToken}`,
-            },
-          });
+          return axios(
+            import.meta.env.VITE_APP_BACKEND_URL + "/clubuser/registered",
+            {
+              headers: {
+                Authorization: `${result.accessToken.jwtToken}`,
+              },
+            }
+          );
         })
         .then((result) => {
           console.log(result);
@@ -43,11 +46,13 @@ function ProgramList() {
           console.log(registeredSessions);
         });
       // Get all program types
-      axios("http://localhost:3000/programs/adult").then((response) => {
-        console.log(response.data);
-        setPrograms(response.data);
-        setBusy(false);
-      });
+      axios(import.meta.env.VITE_APP_BACKEND_URL + "/programs/adult").then(
+        (response) => {
+          console.log(response.data);
+          setPrograms(response.data);
+          setBusy(false);
+        }
+      );
     } catch (e) {
       console.log(e);
     }

@@ -10,6 +10,7 @@ router.route("/").post(validators.registerValidator, async (req, res) => {
   // Check if validation has errors
   const errors = validationResult(req);
   if (errors.isEmpty()) {
+    console.log("just before sign up");
     await signUp
       .signUpPublic(req.body.email, req.body.password)
       .then((result) => {

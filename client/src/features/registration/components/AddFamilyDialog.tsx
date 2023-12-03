@@ -25,6 +25,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { familySchema } from "../validationSchema";
+import dayjs from "dayjs";
 
 type FormValues = {
   firstName: string;
@@ -116,10 +117,10 @@ function AddFamilyDialog(props: {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
                     label="Date of birth"
-                    value={field.value}
+                    value={dayjs(field.value)}
                     inputRef={field.ref}
                     onChange={(date) => {
-                      field.onChange(date);
+                      field.onChange(dayjs(date).toISOString());
                     }}
                     slotProps={{
                       textField: {

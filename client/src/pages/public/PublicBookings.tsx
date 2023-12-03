@@ -42,11 +42,14 @@ function PublicBookings() {
     try {
       getSession()
         .then((result: any) => {
-          return axios("http://localhost:3000/clubuser/my-dashboard", {
-            headers: {
-              Authorization: `${result.accessToken.jwtToken}`,
-            },
-          });
+          return axios(
+            import.meta.env.VITE_APP_BACKEND_URL + "/clubuser/my-dashboard",
+            {
+              headers: {
+                Authorization: `${result.accessToken.jwtToken}`,
+              },
+            }
+          );
         })
         .then((result) => {
           setBookings(

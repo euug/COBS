@@ -77,7 +77,7 @@ function PublicAddBookingButton(props: {
         const session: any = await getSession();
 
         const currentUser = await axios(
-          "http://localhost:3000/clubuser/current-user",
+          import.meta.env.VITE_APP_BACKEND_URL + "/clubuser/current-user",
           {
             headers: {
               Authorization: `${session.accessToken.jwtToken}`,
@@ -88,7 +88,7 @@ function PublicAddBookingButton(props: {
         setPlayer1(currentUser.data);
 
         const listClubUsers: any = await axios(
-          "http://localhost:3000/clubuser",
+          import.meta.env.VITE_APP_BACKEND_URL + "/clubuser",
           {
             headers: {
               Authorization: `${session.accessToken.jwtToken}`,
@@ -125,7 +125,7 @@ function PublicAddBookingButton(props: {
 
     try {
       await axios.post(
-        "http://localhost:3000/bookings",
+        import.meta.env.VITE_APP_BACKEND_URL + "/bookings",
         {
           datetime: props.datetime,
           court: props.court,

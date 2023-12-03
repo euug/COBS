@@ -62,7 +62,7 @@ function SessionRegistration() {
           .then((result: any) => {
             console.log(result.accessToken);
             return axios.post(
-              "http://localhost:3000/transactions/program",
+              import.meta.env.VITE_APP_BACKEND_URL + "/transactions/program",
               {
                 sessionId: sessionid,
               },
@@ -101,21 +101,22 @@ function SessionRegistration() {
     try {
       setBusy(true);
       // Query session by id
-      axios("http://localhost:3000/programs/adult/" + sessionid).then(
-        (response) => {
-          console.log(response);
-          setSession(response.data);
+      axios(
+        import.meta.env.VITE_APP_BACKEND_URL + "/programs/adult/" + sessionid
+      ).then((response) => {
+        console.log(response);
+        setSession(response.data);
 
-          // Get tax amount
-          axios(
-            "http://localhost:3000/transactions/transaction-settings/tax"
-          ).then((response) => {
-            console.log(response.data);
-            setTax(response.data);
-            setBusy(false);
-          });
-        }
-      );
+        // Get tax amount
+        axios(
+          import.meta.env.VITE_APP_BACKEND_URL +
+            "/transactions/transaction-settings/tax"
+        ).then((response) => {
+          console.log(response.data);
+          setTax(response.data);
+          setBusy(false);
+        });
+      });
 
       console.log(session);
     } catch (e) {
@@ -128,11 +129,14 @@ function SessionRegistration() {
       setBusy2(true);
       getSession()
         .then((result: any) => {
-          return axios("http://localhost:3000/clubuser/registered", {
-            headers: {
-              Authorization: `${result.accessToken.jwtToken}`,
-            },
-          });
+          return axios(
+            import.meta.env.VITE_APP_BACKEND_URL + "/clubuser/registered",
+            {
+              headers: {
+                Authorization: `${result.accessToken.jwtToken}`,
+              },
+            }
+          );
         })
         .then((result) => {
           console.log(result);

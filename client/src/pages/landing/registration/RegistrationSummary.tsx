@@ -116,7 +116,7 @@ function RegistrationSummary() {
 
     if (!error) {
       axios
-        .post("http://localhost:3000/register", {
+        .post(import.meta.env.VITE_APP_BACKEND_URL + "/register", {
           email: selector.email,
           firstName: selector.firstName,
           lastName: selector.lastName,

@@ -47,12 +47,14 @@ function LandingPage() {
   useEffect(() => {
     let subscribed = true;
     setLoadingPrograms(true);
-    axios("http://localhost:3000/programs/type").then((res) => {
-      if (subscribed) {
-        setPrograms(res.data);
-        setLoadingPrograms(false);
+    axios(import.meta.env.VITE_APP_BACKEND_URL + "/programs/type").then(
+      (res) => {
+        if (subscribed) {
+          setPrograms(res.data);
+          setLoadingPrograms(false);
+        }
       }
-    });
+    );
 
     return () => {
       subscribed = false;

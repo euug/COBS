@@ -28,6 +28,7 @@ import { familySchema } from "../validationSchema";
 
 // Icons
 import DeleteIcon from "@mui/icons-material/Delete";
+import dayjs from "dayjs";
 
 type FormValues = {
   firstName: string;
@@ -125,10 +126,10 @@ function EditFamilyDialog(props: {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
                     label="Date of birth"
-                    value={field.value}
+                    value={dayjs(field.value)}
                     inputRef={field.ref}
                     onChange={(date) => {
-                      field.onChange(date);
+                      field.onChange(dayjs(date).toISOString());
                     }}
                     slotProps={{
                       textField: {

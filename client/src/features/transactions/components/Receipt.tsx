@@ -30,11 +30,16 @@ function Receipt() {
       getSession()
         .then((result: any) => {
           // Get transaction by ID
-          return axios("http://localhost:3000/transactions/" + transactionid, {
-            headers: {
-              Authorization: `${result.accessToken.jwtToken}`,
-            },
-          });
+          return axios(
+            import.meta.env.VITE_APP_BACKEND_URL +
+              "/transactions/" +
+              transactionid,
+            {
+              headers: {
+                Authorization: `${result.accessToken.jwtToken}`,
+              },
+            }
+          );
         })
         .then((result: any) => {
           console.log(result);

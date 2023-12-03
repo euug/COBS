@@ -47,7 +47,9 @@ function PublicDashboard() {
   const handleReset = async () => {
     setResetLoading(true);
 
-    const resetRes = await axios.delete("http://localhost:3000/reset");
+    const resetRes = await axios.delete(
+      import.meta.env.VITE_APP_BACKEND_URL + "/reset"
+    );
 
     console.log(resetRes);
 
@@ -67,11 +69,14 @@ function PublicDashboard() {
     try {
       getSession()
         .then((result: any) => {
-          return axios("http://localhost:3000/clubuser/my-dashboard", {
-            headers: {
-              Authorization: `${result.accessToken.jwtToken}`,
-            },
-          });
+          return axios(
+            import.meta.env.VITE_APP_BACKEND_URL + "/clubuser/my-dashboard",
+            {
+              headers: {
+                Authorization: `${result.accessToken.jwtToken}`,
+              },
+            }
+          );
         })
         .then((result) => {
           console.log(result);

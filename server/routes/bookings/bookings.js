@@ -256,7 +256,10 @@ router.route("/bookingRangeByDay").get(async (req, res) => {
   if (req.query.currentDate) {
     const bookingRange = await prisma.bookingRangeByDay.findUnique({
       where: {
-        dayOfWeek: dayjs.utc(req.query.currentDate).format("dddd"),
+        dayOfWeek: dayjs
+          .utc(req.query.currentDate)
+          .add(req.query.offset, "day")
+          .format("dddd"),
       },
     });
 

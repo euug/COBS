@@ -31,10 +31,12 @@ function PublicPrograms() {
   const queryProgramTypes = async () => {
     try {
       // Get all program types
-      axios("http://localhost:3000/programs/type").then((response) => {
-        console.log(response.data);
-        setProgramTypes(response.data);
-      });
+      axios(import.meta.env.VITE_APP_BACKEND_URL + "/programs/type").then(
+        (response) => {
+          console.log(response.data);
+          setProgramTypes(response.data);
+        }
+      );
       setBusy(false);
     } catch (e) {
       console.log(e);
